@@ -1,0 +1,121 @@
+#+TITLE: Emacs Configuration
+#+OPTIONS: toc:2
+
+* Table of Contents :toc:
+- [[#package-manager][Package Manager]]
+- [[#general][General]]
+- [[#evil-mode][Evil Mode]]
+- [[#keybindings][Keybindings]]
+- [[#gui][GUI]]
+- [[#org-mode][Org Mode]]
+  - [[#enable-table-of-contents][Enable Table of Contents]]
+- [[#which-key][Which Key]]
+
+* Package Manager
+
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (package-initialize)
+
+  (unless package-archive-contents
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (eval-when-compile (require 'use-package))
+#+END_SRC
+
+* General
+
+#+BEGIN_SRC emacs-lisp
+  ;; Put all backup files (~ files) into a dedicated directory
+  (setq backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
+
+  ;; Put all auto-save files (# files) into a dedicated directory
+  (setq auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "auto-save/") t)))
+
+  ;; Prevent lock files (.# files) from being created
+  (setq create-lockfiles nil)
+
+  ;; Disable the startup screen/splash screen
+  (setq inhibit-startup-screen t)
+  (setq inhibit-splash-screen t)
+
+  ;; Prevent the default startup message in the echo area/minibuffer
+  (setq inhibit-startup-echo-area-message "pedro.fernandes")
+
+  ;; Make the scratch buffer completely empty on start (removes the initial text comment)
+  (setq initial-scratch-message "")
+#+END_SRC
+
+* Evil Mode
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :ensure t
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil) ;; required for evil-collection
+    (setq evil-vsplit-window-right t)
+    (setq evil-split-window-below t)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-d-scroll t)
+    (setq evil-disable-insert-state-bindings t)
+    :config
+    (evil-mode 1))
+  (use-package evil-collection
+    :after evil
+    :ensure t
+    :config
+    (evil-collection-init))
+#+END_SRC
+
+* Keybindings
+
+#+BEGIN_SRC emacs-lisp
+  (use-package general
+    :ensure t
+    :config
+    (general-evil-setup)
+    (general-create-definer cfg/leader-keys
+  	:states '(normal insert visual emacs)
+  	:keymaps 'override
+  	:prefix "SPC"
+  	:global-prefix "M-SPC")
+
+    (cfg/leader-keys
+      ;; Org Mode
+      "o" '(:ignore t :which-key "org")
+      "o a" '(org-agenda :which-key "agenda")))
+#+END_SRC
+
+* GUI
+
+This section handles the visual look of my Emacs setup.
+
+#+BEGIN_SRC emacs-lisp
+  (tool-bar-mode 0)
+  (menu-bar-mode 0)
+  (scroll-bar-mode 0)
+
+  (global-display-line-numbers-mode 1)
+  (global-visual-line-mode t)
+#+END_SRC
+
+* Org Mode
+
+** Enable Table of Contents
+
+#+BEGIN_SRC emacs-lisp
+  (use-package toc-org
+    :ensure t
+    :after org
+    :hook (org-mode . toc-org-enable))
+#+END_SRC
+
+* Which Key
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :ensure t
+    :init (which-key-mode 1))
+#+END_SRC
